@@ -7,6 +7,8 @@ import com.nitsshukla.logrotation.strategy.LogFileRotationStrategy;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 public class CircularLogFileRotationStrategyImplTest {
@@ -28,4 +30,15 @@ public class CircularLogFileRotationStrategyImplTest {
             fail();
         }
     }
+    
+    @Test
+    public void testIfRecordsPresent() {
+    	assertNotNull(logFileRotationStrategy.getAllLogs());
+    }
+
+    @Test
+    public void testValidSize() {
+//		assertTrue("Setup a valid threshold. ",logFileRotationStrategy.maxSizeInBytes>0);
+    }
+
 }

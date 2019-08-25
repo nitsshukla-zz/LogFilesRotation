@@ -7,6 +7,11 @@ import com.nitsshukla.logrotation.strategy.LogFileRotationStrategy;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
+
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.fail;
 
 public class CircularLogFileRotationStrategyImplTest {
@@ -14,15 +19,22 @@ public class CircularLogFileRotationStrategyImplTest {
     private LogFileRotationStrategy logFileRotationStrategy;
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         //do some initial setup
-        logFileRotationStrategy = new CircularLogFileRotationStrategyImpl(123);
+        logFileRotationStrategy = new CircularLogFileRotationStrategyImpl(60);
     }
 
     @Test
     public void testSaneInput() {
         try {
             logFileRotationStrategy.log("123");
+            logFileRotationStrategy.log("456");
+            ByteBuffer byteBuffer = logFileRotationStrategy.getAllLogs();
+            CharBuffer charBuffer = StandardCharsets.UTF_8.decode(byteBuffer);
+            String a = new String(charBuffer.array());
+            assertTrue(a.contains("123"));
+            assertTrue(a.contains("456"));
+            System.out.println(a);
         } catch (Exception e) {
             e.printStackTrace();
             fail();

@@ -6,7 +6,7 @@ import com.nitsshukla.logrotation.strategy.LogFileRotationStrategy;
 
 public class LogFileRotationMain {
     static Injector injector;
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         injector = Guice.createInjector(new LogFileRotationModule());
         LogFileRotationStrategy strategy =
                 injector.getInstance(LogFileRotationModule.LogFileRotationStrategyFactory.class)

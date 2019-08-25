@@ -11,12 +11,12 @@ public class LogFileRotationModule extends AbstractModule {
     }
 
     public interface LogFileRotationStrategyFactory {
-        LogFileRotationStrategy createStrategy(long size);
+        LogFileRotationStrategy createStrategy(long size) throws Exception;
     }
     public static class CircularFileRotationStrategyFactory implements LogFileRotationStrategyFactory {
 
         @Override
-        public LogFileRotationStrategy createStrategy(long size) {
+        public LogFileRotationStrategy createStrategy(long size) throws Exception {
             return new CircularLogFileRotationStrategyImpl(size);
         }
     }

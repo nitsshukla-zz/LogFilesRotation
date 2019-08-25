@@ -2,7 +2,6 @@ package com.nitsshukla.logrotation;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.nitsshukla.logrotation.strategy.LogFileRotationStrategy;
 
 public class LogFileRotationMain {
     static Injector injector;

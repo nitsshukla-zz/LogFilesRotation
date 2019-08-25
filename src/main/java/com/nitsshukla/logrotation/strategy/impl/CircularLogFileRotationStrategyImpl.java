@@ -4,7 +4,7 @@ import com.nitsshukla.logrotation.strategy.LogFileRotationStrategy;
 
 import java.nio.ByteBuffer;
 
-public class CirculatLogFileRotationStrategyImpl implements LogFileRotationStrategy {
+public class CircularLogFileRotationStrategyImpl implements LogFileRotationStrategy {
 
     @Override
     public void log(String logMessage) {

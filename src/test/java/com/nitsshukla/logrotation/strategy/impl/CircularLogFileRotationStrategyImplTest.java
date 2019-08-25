@@ -25,6 +25,22 @@ public class CircularLogFileRotationStrategyImplTest {
     }
 
     @Test
+    public void testOverflowInput() {
+        int count_test = 9;
+        for (int i=0;i<count_test;i++)
+            logFileRotationStrategy.log((3*i)+""+(3*i+1)+""+(3*i+2));
+        ByteBuffer byteBuffer = logFileRotationStrategy.getAllLogs();
+        CharBuffer charBuffer = StandardCharsets.UTF_8.decode(byteBuffer);
+        String a = new String(charBuffer.array());
+        System.out.println(a);
+        for (int i=count_test-1;i>1;i--) {
+            assertTrue(a.contains((3 * i) + "" + (3 * i + 1) + "" + (3 * i + 2)));
+            System.out.println(i);
+        }
+        System.out.println(a);
+    }
+
+    @Test
     public void testSaneInput() {
         try {
             logFileRotationStrategy.log("123");

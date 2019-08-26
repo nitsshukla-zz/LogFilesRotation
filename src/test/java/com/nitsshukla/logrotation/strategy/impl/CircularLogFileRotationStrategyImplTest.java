@@ -4,13 +4,13 @@
 package com.nitsshukla.logrotation.strategy.impl;
 
 import com.nitsshukla.logrotation.strategy.LogFileRotationStrategy;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 
+import static com.nitsshukla.logrotation.strategy.impl.CircularLogFileRotationStrategyImpl.DELIMETER;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -18,14 +18,9 @@ public class CircularLogFileRotationStrategyImplTest {
 
     private LogFileRotationStrategy logFileRotationStrategy;
 
-    @Before
-    public void setup() throws Exception {
-        //do some initial setup
-        logFileRotationStrategy = new CircularLogFileRotationStrategyImpl(60);
-    }
-
     @Test
-    public void testOverflowInput() {
+    public void testOverflowInput() throws Exception {
+        logFileRotationStrategy = new CircularLogFileRotationStrategyImpl(60);
         int count_test = 9;
         for (int i=0;i<count_test;i++)
             logFileRotationStrategy.log((3*i)+""+(3*i+1)+""+(3*i+2));
@@ -41,8 +36,33 @@ public class CircularLogFileRotationStrategyImplTest {
     }
 
     @Test
+    public void testOverflowOrderedInput() throws Exception {
+        logFileRotationStrategy = new CircularLogFileRotationStrategyImpl(60);
+        int count_test = 9;
+        for (int i=0;i<count_test;i++)
+            logFileRotationStrategy.log((3*i)+""+(3*i+1)+""+(3*i+2));
+        ByteBuffer byteBuffer = logFileRotationStrategy.getAllLogs();
+        CharBuffer charBuffer = StandardCharsets.UTF_8.decode(byteBuffer);
+        String a = new String(charBuffer.array());
+        System.out.println(a);
+        StringBuilder expected = new StringBuilder();
+        int index=0;
+        for (int i=2;i<count_test;i++) {
+            String a1 = ((3 * i) + "" + (3 * i + 1) + "" + (3 * i + 2));
+            index = a.indexOf(a1, index);
+            if (index==-1) {
+                System.out.println(i+"\t"+index);
+                fail();
+            }
+        }
+//        assertTrue(a.contains(expected));
+        System.out.println(a);
+    }
+
+    @Test
     public void testSaneInput() {
         try {
+            logFileRotationStrategy = new CircularLogFileRotationStrategyImpl(60);
             logFileRotationStrategy.log("123");
             logFileRotationStrategy.log("456");
             ByteBuffer byteBuffer = logFileRotationStrategy.getAllLogs();
@@ -56,4 +76,5 @@ public class CircularLogFileRotationStrategyImplTest {
             fail();
         }
     }
+
 }

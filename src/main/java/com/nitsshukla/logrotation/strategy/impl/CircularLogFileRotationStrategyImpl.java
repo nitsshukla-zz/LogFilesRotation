@@ -5,6 +5,7 @@ import com.nitsshukla.logrotation.strategy.LogFileRotationStrategy;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
@@ -19,7 +20,7 @@ import static java.nio.file.StandardOpenOption.*;
 public class CircularLogFileRotationStrategyImpl implements LogFileRotationStrategy {
 
     private static final String FILE_NAME = "client.log";
-    private static byte DELIMETER = '\n';
+    public static final byte DELIMETER = '\n';
     private static int DELIMETER_LENGTH = 1;
 
     private final int maxSizeInBytes;
@@ -82,7 +83,7 @@ public class CircularLogFileRotationStrategyImpl implements LogFileRotationStrat
 
         while (index++ < newSpaceNeeded && mappedByteBuffer.getChar() != DELIMETER) {
             mappedByteBuffer.position(mappedByteBuffer.position()-2);
-            mappedByteBuffer.put((byte)0b00);
+            mappedByteBuffer.put(DELIMETER);
             //mappedByteBuffer.position(mappedByteBuffer.position() + 1);
             System.out.println(mappedByteBuffer.position());
         }
@@ -93,13 +94,57 @@ public class CircularLogFileRotationStrategyImpl implements LogFileRotationStrat
     @Override
     public ByteBuffer getAllLogs() {
         //return mappedByteBuffer.get(new byte[mappedByteBuffer.position()]);
-        if (!overflowed) {
+        /*if (!overflowed) {
             mappedByteBuffer.flip();
         } else {
             mappedByteBuffer.position(mappedByteBuffer.limit());
             mappedByteBuffer.flip();
         }
-        mappedByteBuffer.position(8);
-        return mappedByteBuffer.slice();
+        mappedByteBuffer.position(8);*/
+
+        //seek - limit-x
+        //8-seek
+        if (overflowed) {
+            int x = getLastTrail();
+            StringBuilder pinnadi = new StringBuilder();
+            mappedByteBuffer.position(sizeInBytes);
+            ByteBuffer buffer = ByteBuffer.allocate(1+mappedByteBuffer.capacity());
+            buffer.put(mappedByteBuffer.get(new byte[mappedByteBuffer.capacity()-x-sizeInBytes]).flip().slice());
+            mappedByteBuffer.position(8);
+            //buffer.put(mappedByteBuffer.get(new byte[sizeInBytes-9]).flip().slice());
+            while (true) { //this is messy, get rid off it
+                byte c1 = mappedByteBuffer.get();
+                if (c1==(byte)0 || mappedByteBuffer.position()>sizeInBytes)break;
+                buffer.put(c1);
+            }
+            buffer.flip();
+            return buffer.slice();
+        } else {
+            mappedByteBuffer.position(sizeInBytes);
+            ByteBuffer byteBuffer = mappedByteBuffer.get(new byte[sizeInBytes-8], 0, sizeInBytes-8);
+            byteBuffer.flip();
+            return byteBuffer;
+        }
+    }
+
+    private void print(ByteBuffer buf) {
+        int pos = buf.position();
+        buf.position(0);
+        CharBuffer charBuffer = StandardCharsets.UTF_8.decode(buf);
+        System.out.println(pos+"----------------------");
+        System.out.println(new String(charBuffer.array()));
+        System.out.println("----------------------");
+        buf.position(pos);
+    }
+
+    private int getLastTrail() {
+        mappedByteBuffer.mark();
+        int x = 0;
+        while (mappedByteBuffer.get(mappedByteBuffer.limit()-x-1) == (byte)00) {
+            x++;
+            System.out.println("del: " + x);
+        }
+        mappedByteBuffer.reset();
+        return x;
     }
 }
